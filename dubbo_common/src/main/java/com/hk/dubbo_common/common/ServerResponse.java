@@ -10,10 +10,12 @@ import java.io.Serializable;
  * @date 2018/10/29 23:25
  */
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
+@SuppressWarnings("serial")
 public class ServerResponse<T> implements Serializable{
     private int status;
     private String msg;
     private T data;
+
     private ServerResponse(int status){
         this.status = status;
     }

@@ -1,8 +1,14 @@
 package com.hk.dubbo_common.pojo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import java.io.Serializable;
 import java.util.Date;
 
-public class PayInfo {
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@SuppressWarnings("serial")
+public class PayInfo implements Serializable {
+    private static final long serialVersionUID = 6974447819466381596L;
     private Integer id;
 
     private Integer userId;

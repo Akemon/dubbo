@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 @Slf4j
 public class CookieUtil {
 
-    private final static String COOKIE_DOMAIN = ".hk.shop.com";
+    private final static String COOKIE_DOMAIN = "www.hk.shop.com";
     private final static String COOKIE_NAME = "user_login_token";
 
     public static void writeToken(HttpServletResponse response, String token) {

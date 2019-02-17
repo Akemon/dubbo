@@ -1,9 +1,15 @@
 package com.hk.dubbo_common.pojo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
-public class Order {
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@SuppressWarnings("serial")
+public class Order implements Serializable {
+    private static final long serialVersionUID = -906596189503012539L;
     private Integer id;
 
     private Long orderNo;

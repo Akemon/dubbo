@@ -20,8 +20,11 @@
     <module>dubbo_common</module>
     <module>dubbo_product</module>
     <module>dubbo_user</module>
+    <module>dubbo_category</module>
     <module>dubbo_controller</module>
-    <module>dubbo_api</module>
+    <module>dubbo_order</module>
+    <module>dubbo_cart</module>
+    <module>dubbo_shipping</module>
   </modules>
 
   <properties>
@@ -50,11 +53,6 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
       <version>${spring-boot.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-tomcat</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -106,6 +104,14 @@
 
 
 
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-devtools</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+
   </dependencies>
 
   <build>
@@ -113,6 +119,13 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <fork>true</fork>
+        </configuration>
       </plugin>
     </plugins>
   </build>

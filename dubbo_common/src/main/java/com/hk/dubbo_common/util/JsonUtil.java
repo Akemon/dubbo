@@ -1,6 +1,6 @@
 package com.hk.dubbo_common.util;
 
-//import com.hk.shop.pojo.User;
+import com.hk.dubbo_common.pojo.User;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.DeserializationConfig;
@@ -68,23 +68,23 @@ public class JsonUtil {
     }
 
     public static void main(String[] args) {
-//        User user = new User();
-//        user.setPassword("111");
-//        user.setUsername("test");
-//        User user2 = new User();
-//        user2.setPassword("222");
-//        user2.setUsername("test2");
-//        String str = object2String(user);
-//        System.out.println("serializa object:"+str);
-//        User deserializaUser = string2Object(str,User.class);
-//        System.out.println("deserializa object:"+deserializaUser);
-//        List<User> users = new ArrayList<>();
-//        users.add(user);
-//        users.add(user2);
-//        String arrStr = object2String(users);
-//        System.out.println("serializa array:"+arrStr);
-//        List<User> deserializaArray = string2Object(arrStr, new TypeReference<List<User>>() {});
-//        System.out.println("deserializa array:"+deserializaArray);
+        User user = new User();
+        user.setPassword("111");
+        user.setUsername("test");
+        User user2 = new User();
+        user2.setPassword("222");
+        user2.setUsername("test2");
+        String str = object2String(user);
+        System.out.println("serializa object:"+str);
+        User deserializaUser = string2Object(str,User.class);
+        System.out.println("deserializa object:"+deserializaUser);
+        List<User> users = new ArrayList<>();
+        users.add(user);
+        users.add(user2);
+        String arrStr = object2String(users);
+        System.out.println("serializa array:"+arrStr);
+        List<User> deserializaArray = string2Object(arrStr, new TypeReference<List<User>>() {});
+        System.out.println("deserializa array:"+deserializaArray);
     }
 
 

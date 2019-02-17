@@ -2,10 +2,12 @@ package com.hk.dubbo_common.pojo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class User {
+@SuppressWarnings("serial")
+public class User implements Serializable{
     private Integer id;
 
     private String username;

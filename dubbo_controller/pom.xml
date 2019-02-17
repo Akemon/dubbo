@@ -21,11 +21,7 @@
   </properties>
 
   <dependencies>
-    <dependency>
-      <artifactId>dubbo_api</artifactId>
-      <groupId>com.hk</groupId>
-      <version>0.0.1-SNAPSHOT</version>
-    </dependency>
+
   </dependencies>
 
   <build>

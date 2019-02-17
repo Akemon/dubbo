@@ -1,9 +1,15 @@
 package com.hk.dubbo_common.pojo;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
-public class OrderItem {
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@SuppressWarnings("serial")
+public class OrderItem implements Serializable {
+    private static final long serialVersionUID = -5190208405165471848L;
     private Integer id;
 
     private Integer userId;
