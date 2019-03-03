@@ -25,4 +25,6 @@ public interface OrderItemMapper {
 
     //获取订单的商品信息
     List<OrderItem> getByUserId(@Param("userId") Integer userId);
+
+    List<OrderItem> getByOrderNo(@Param("orderNo")Long orderNo);
 }

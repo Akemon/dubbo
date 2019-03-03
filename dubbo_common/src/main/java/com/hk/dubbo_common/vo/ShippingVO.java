@@ -1,10 +1,13 @@
 package com.hk.dubbo_common.vo;
 
+import java.io.Serializable;
+
 /**
  * @author 何康
  * @date 2018/11/6 10:36
  */
-public class ShippingVO {
+public class ShippingVO implements Serializable{
+    private static final long serialVersionUID = -4985936717093809853L;
     private String receiverName;
 
     private String receiverPhone;

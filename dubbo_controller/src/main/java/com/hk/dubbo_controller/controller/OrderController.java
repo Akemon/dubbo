@@ -9,6 +9,9 @@ import com.hk.dubbo_common.common.Const;
 import com.hk.dubbo_common.common.ServerResponse;
 import com.hk.dubbo_common.pojo.User;
 import com.hk.dubbo_common.service.IOrderService;
+import com.hk.dubbo_common.util.CookieUtil;
+import com.hk.dubbo_common.util.JsonUtil;
+import com.hk.dubbo_common.util.RedisShardPoolUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,18 +42,20 @@ public class OrderController {
 
     /***
      * 创建订单
-     * @param session
+     * @param
      * @param shippingId
      * @return
      */
     @RequestMapping(value = "create.do",method = RequestMethod.POST)
     @ResponseBody
-    public ServerResponse create(HttpSession session, Integer shippingId){
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if(user!= null){
+    public ServerResponse create(Integer shippingId,
+                                 HttpServletRequest request){
+        String cookieValue = CookieUtil.readToken(request);
+        if (cookieValue != null) {
+            User user = JsonUtil.string2Object(RedisShardPoolUtil.get(cookieValue), User.class);
             return orderService.createOrder(user.getId(),shippingId);
         }
-        return ServerResponse.createByError("用户未登陆,请登录");
+        return ServerResponse.createByError("用户未登陆，无法查询用户信息");
     }
 
     /***
@@ -114,20 +119,6 @@ public class OrderController {
         }
         return ServerResponse.createByError("用户未登陆,请登录");
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /***
      * 支付
      * @param session

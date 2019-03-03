@@ -8,6 +8,7 @@ import com.hk.dubbo_common.common.TokenCache;
 import com.hk.dubbo_common.pojo.User;
 import com.hk.dubbo_common.service.UserService;
 import com.hk.dubbo_common.util.MD5Util;
+import com.hk.dubbo_common.util.RedisShardPoolUtil;
 import com.hk.dubbo_user.dao.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -139,7 +140,7 @@ public class UserServiceImpl  implements UserService {
 		if(result>0){
 			//创建缓存临时存储一个token，用于防止用户的横向越权的问题
 			String forgetToken = UUID.randomUUID().toString();
-			TokenCache.setKey(TokenCache.TOKEN_PREFIX+username,forgetToken);
+			RedisShardPoolUtil.setEx(Const.TOKEN_PREFIX+username,forgetToken,30);
 			//将token返回给客户端
 			return ServerResponse.createBySuccess(forgetToken);
 		}
@@ -164,7 +165,7 @@ public class UserServiceImpl  implements UserService {
 			return ServerResponse.createByError("参数错误，token需要传递");
 		}
 		//token是否过期并比较是否相同
-		String token =  TokenCache.getValue(TokenCache.TOKEN_PREFIX+username);
+		String token =  RedisShardPoolUtil.get(Const.TOKEN_PREFIX+username);
 		if(org.apache.commons.lang3.StringUtils.isBlank(token)){
 			return ServerResponse.createByError("token无效或过期");
 		}

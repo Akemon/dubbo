@@ -47,4 +47,6 @@ public interface IOrderService {
 
     //订单发货
     ServerResponse shippingGoods(Long orderNo);
+
+    void closeOrder(int hour);
 }

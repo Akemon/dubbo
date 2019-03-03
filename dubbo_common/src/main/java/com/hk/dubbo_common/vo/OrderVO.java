@@ -1,5 +1,6 @@
 package com.hk.dubbo_common.vo;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -7,8 +8,9 @@ import java.util.List;
  * @author 何康
  * @date 2018/11/7 22:09
  */
-public class OrderVO {
+public class OrderVO implements Serializable{
 
+    private static final long serialVersionUID = 4495869845785561882L;
     private Long orderNo;
 
     private BigDecimal payment;

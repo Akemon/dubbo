@@ -1,5 +1,6 @@
 package com.hk.dubbo_common.vo;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -7,7 +8,8 @@ import java.util.List;
  * @author 何康
  * @date 2018/11/5 21:21
  */
-public class CartVO {
+public class CartVO implements Serializable{
+    private static final long serialVersionUID = 7350985513182384497L;
     private List<CartProductVO> productVOList;
     private BigDecimal cartTotalPrice;
     private Boolean allChecked;

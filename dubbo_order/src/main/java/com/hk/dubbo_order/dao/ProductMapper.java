@@ -26,4 +26,6 @@ public interface ProductMapper {
 
     //根据id列表和商品名称搜索商品
     List<Product> selectByKeywordAndCategoryIds(@Param("keyword") String keyword, @Param("categoryIdList") List<Integer> categoryIdList);
+
+    Integer selectStockByProductId(Integer id);
 }

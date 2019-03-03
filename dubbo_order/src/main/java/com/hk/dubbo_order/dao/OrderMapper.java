@@ -29,4 +29,8 @@ public interface OrderMapper {
 
     //根据订单号查询订单列表
     List<Order> searchByOrderNo(@Param("orderNo") Long orderNo);
+
+    List<Order> selectOrderStatusByCreateTime(@Param("status") Integer status,@Param("date") String date);
+
+    int closeOrderByOrderId(Integer id);
 }

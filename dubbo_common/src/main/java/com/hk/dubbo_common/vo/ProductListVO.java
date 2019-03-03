@@ -1,12 +1,14 @@
 package com.hk.dubbo_common.vo;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
  * @author 何康
  * @date 2018/11/4 22:33
  */
-public class ProductListVO {
+public class ProductListVO implements Serializable{
+    private static final long serialVersionUID = 9081959405394507342L;
     private Integer id;
 
     private Integer categoryId;

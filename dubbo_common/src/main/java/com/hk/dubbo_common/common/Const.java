@@ -15,6 +15,8 @@ public class Const {
     public static final String EMAIL = "email";
     public static final String USERNAME = "username";
 
+    public static final String TOKEN_PREFIX = "token_";
+
     public interface ProductListOrderBy{
         Set<String> PRICE_ASC_DESC = Sets.newHashSet("price_desc","price_asc");
     }
@@ -80,6 +82,9 @@ public class Const {
         }
 
     }
+    public interface RedisLock{
+        String CLOSE_ORDER_LOCK = "CLOSE_ORDER_LOCK";
+    }
     public interface AlipayCallback{
         String TRADE_STATUS_WAIT_BUYER_PAY="WAIT_BUYER_PAY";
         String TRADE_STATUS_TRADE_SUCCESS="TRADE_SUCCESS";
@@ -87,6 +92,7 @@ public class Const {
         String RESPONSE_SUCCESS="success";
         String RESPONSE_FAILED="failed";
     }
+
     public enum PayPlatformEnum{
         ALIPAY(1,"支付宝")
         ;

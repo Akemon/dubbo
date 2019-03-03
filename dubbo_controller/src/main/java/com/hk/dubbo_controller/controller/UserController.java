@@ -40,6 +40,7 @@ public class UserController {
     public ServerResponse<User> login(@RequestParam("username") String userName,
                                       @RequestParam("password") String password,
                                       HttpServletResponse httpServletResponse) {
+        httpServletResponse.addHeader("Access-Control-Allow-Origin","*");
         ServerResponse<User> response = userService.login(userName, password);
         if (response.isSuccess()) {
             String uuidString = UUID.randomUUID().toString();
@@ -62,9 +63,9 @@ public class UserController {
     public ServerResponse<String> logout(HttpServletRequest request,
                                          HttpServletResponse response) {
         String loginToken = CookieUtil.readToken(request);
-        CookieUtil.delLoginToken(request,response);
+        CookieUtil.delLoginToken(request, response);
         if (loginToken != null)
-        RedisShardPoolUtil.del(loginToken);
+            RedisShardPoolUtil.del(loginToken);
         return ServerResponse.createBySuccess("退出成功");
     }
 
@@ -76,6 +77,7 @@ public class UserController {
     @RequestMapping(value = "register.do", method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<String> register(User user) {
+
         return userService.register(user);
     }
 
@@ -87,6 +89,7 @@ public class UserController {
     @RequestMapping(value = "check_valid.do", method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<String> checkValid(String str, String type) {
+
         return userService.checkValid(str, type);
     }
 
@@ -96,14 +99,13 @@ public class UserController {
      * @return*/
     @RequestMapping(value = "get_user_info.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServerResponse<User> getUserInfo() {
-//        User user = (User) session.getAttribute(Const.CURRENT_USER);
-//        if(user!= null){
-//            return ServerResponse.createBySuccess(user);
-//        }
-//        return ServerResponse.createByError("用户未登陆，无法查询用户信息");
-//        return ServerResponse.createBySuccess((User)session.getAttribute(Const.CURRENT_USER));
-        return null;
+    public ServerResponse<User> getUserInfo(HttpServletRequest request) {
+        String cookieValue = CookieUtil.readToken(request);
+        if (cookieValue != null) {
+            User user = JsonUtil.string2Object(RedisShardPoolUtil.get(cookieValue), User.class);
+            return ServerResponse.createBySuccess(user);
+        }
+        return ServerResponse.createByError("用户未登陆，无法查询用户信息");
     }
 
     /***
@@ -150,12 +152,14 @@ public class UserController {
     @RequestMapping(value = "reset_password.do", method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<String> resetPassword(String passwordOld, String passwordNew
-    ) {
-        //判断用户是否登录
-//        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        User user = null;
-        if (user == null) return ServerResponse.createByError("用户未登录");
-        return userService.resetPassword(passwordOld, passwordNew, user);
+    , HttpServletRequest request) {
+        String cookieValue = CookieUtil.readToken(request);
+        if (cookieValue != null) {
+            User user = JsonUtil.string2Object(RedisShardPoolUtil.get(cookieValue), User.class);
+            return userService.resetPassword(passwordOld, passwordNew, user);
+        }
+        return ServerResponse.createByError("用户未登录");
+
     }
 
     /***
@@ -165,20 +169,24 @@ public class UserController {
      * @return*/
     @RequestMapping(value = "update_information.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServerResponse<User> updateInformation(User user) {
-      /*  //判断用户是否登录
-        User currentUser = (User) session.getAttribute(Const.CURRENT_USER);
-        if(currentUser==null) return ServerResponse.createByError("用户未登录");
-        //用户名不能修改，从缓存里取
-        user.setId(currentUser.getId());
-        user.setUsername(currentUser.getUsername());
-        //开始更新个人信息,注：更新后的用户个人信息重新存入session中
-        ServerResponse<User> response = userService.updateInformation(user);
-        session.setAttribute(Const.CURRENT_USER,response.getData());
-        //将user设置为空
-        response.setData(null);
-        return response;*/
-        return null;
+    public ServerResponse<User> updateInformation(User user,HttpServletRequest request,
+                                                  HttpServletResponse servletResponse) {
+
+
+
+        String cookieValue = CookieUtil.readToken(request);
+        if (cookieValue != null) {
+            User currentUser = JsonUtil.string2Object(RedisShardPoolUtil.get(cookieValue), User.class);
+            user.setId(currentUser.getId());
+            user.setUsername(currentUser.getUsername());
+            //开始更新个人信息,注：更新后的用户个人信息重新存入session中
+            ServerResponse<User> response = userService.updateInformation(user);
+            CookieUtil.writeToken(servletResponse, cookieValue);
+            RedisShardPoolUtil.setEx(cookieValue,
+                    JsonUtil.object2String(response.getData()), 60 * 30);
+            return response;
+        }
+        return ServerResponse.createByError("用户未登录");
     }
 
 
@@ -188,11 +196,13 @@ public class UserController {
      * @return*/
     @RequestMapping(value = "get_information.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServerResponse<User> getInformation() {
-//        User currentUser = (User) session.getAttribute(Const.CURRENT_USER);
-//        if(currentUser==null) return ServerResponse.createByError(10,"用户未登录,无法获取当前用户信息,status=10,强制登录");
-//        return userService.getUserInformation(currentUser.getId());
-        return null;
+    public ServerResponse<User> getInformation(HttpServletRequest request) {
+        String cookieValue = CookieUtil.readToken(request);
+        if (cookieValue != null) {
+            User user = JsonUtil.string2Object(RedisShardPoolUtil.get(cookieValue), User.class);
+            return userService.getUserInformation(user.getId());
+        }
+        return ServerResponse.createByError("用户未登录");
     }
 
 
