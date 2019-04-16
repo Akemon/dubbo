@@ -39,8 +39,14 @@ public class UserController {
     @ResponseBody
     public ServerResponse<User> login(@RequestParam("username") String userName,
                                       @RequestParam("password") String password,
-                                      HttpServletResponse httpServletResponse) {
+                                      HttpServletRequest request
+            ,HttpServletResponse httpServletResponse) {
         httpServletResponse.addHeader("Access-Control-Allow-Origin","*");
+        String cookieValue = CookieUtil.readToken(request);
+        if (cookieValue != null) {
+            User user = JsonUtil.string2Object(RedisShardPoolUtil.get(cookieValue), User.class);
+            return ServerResponse.createBySuccess(user);
+        }
         ServerResponse<User> response = userService.login(userName, password);
         if (response.isSuccess()) {
             String uuidString = UUID.randomUUID().toString();

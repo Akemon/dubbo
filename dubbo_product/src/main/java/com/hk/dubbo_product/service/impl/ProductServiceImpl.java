@@ -8,6 +8,7 @@ import com.hk.dubbo_common.common.Const;
 import com.hk.dubbo_common.common.PropertiesUtil;
 import com.hk.dubbo_common.common.ResponseCode;
 import com.hk.dubbo_common.common.ServerResponse;
+import com.hk.dubbo_common.pojo.OrderItem;
 import com.hk.dubbo_product.dao.CategoryMapper;
 import com.hk.dubbo_product.dao.ProductMapper;
 import com.hk.dubbo_common.pojo.Category;
@@ -17,13 +18,21 @@ import com.hk.dubbo_common.service.IProductService;
 import com.hk.dubbo_common.util.DateTimeUtil;
 import com.hk.dubbo_common.vo.ProductDetailVO;
 import com.hk.dubbo_common.vo.ProductListVO;
+import com.rabbitmq.client.Channel;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.Headers;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -32,6 +41,7 @@ import java.util.Set;
  */
 @Service
 @com.alibaba.dubbo.config.annotation.Service(version = "1.0.0")
+@Slf4j
 public class ProductServiceImpl implements IProductService {
 
     @Autowired
@@ -290,6 +300,32 @@ public class ProductServiceImpl implements IProductService {
         }
         return categorySet;
 
+    }
+
+
+    //商品库存减少
+    @RabbitListener(
+            bindings = @QueueBinding(
+                    value = @Queue(value = "product-queue", durable = "true"),
+                    exchange = @Exchange(value = "order-exchange", durable = "true", type = "topic"),
+                    key = "orderItem"
+            )
+    )
+    @RabbitHandler
+    public void onOrderMessage(@Payload List<OrderItem> orderItemList, @Headers Map<String, Object> headers,
+                               Channel channel) {
+        try {
+            System.out.println("------商品模块收到消息，开始消费---------");
+            for(OrderItem orderItem :orderItemList){
+                Product product = productMapper.selectByPrimaryKey(orderItem.getProductId());
+                product.setStock(product.getStock()-orderItem.getQuantity());
+                productMapper.updateByPrimaryKeySelective(product);
+            }
+            Long deliveryTag = (Long) headers.get(AmqpHeaders.DELIVERY_TAG);
+            channel.basicAck(deliveryTag, false);
+        } catch (IOException e) {
+            log.error("消费者消费信息时异常：{}", e);
+        }
     }
 
 }

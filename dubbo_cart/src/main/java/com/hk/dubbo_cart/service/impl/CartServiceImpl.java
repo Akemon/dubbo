@@ -15,11 +15,18 @@ import com.hk.dubbo_common.service.ICartService;
 import com.hk.dubbo_common.util.BigDecimalUtil;
 import com.hk.dubbo_common.vo.CartProductVO;
 import com.hk.dubbo_common.vo.CartVO;
+import com.rabbitmq.client.Channel;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.Headers;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +37,7 @@ import java.util.Map;
  */
 @Service
 @com.alibaba.dubbo.config.annotation.Service(version = "1.0.0")
+@Slf4j
 public class CartServiceImpl implements ICartService {
 
     @Autowired
@@ -216,4 +224,28 @@ public class CartServiceImpl implements ICartService {
         return cartMapper.selectCartProductCheckedStatusByUserId(userId) == 0;
 
     }
+
+    //删减购物车
+    @RabbitListener(
+            bindings = @QueueBinding(
+                    value = @Queue(value = "cart-queue", durable = "true"),
+                    exchange = @Exchange(value = "order-exchange", durable = "true", type = "topic"),
+                    key = "cartList"
+            )
+    )
+    @RabbitHandler
+    public void onOrderMessage(@Payload List<Cart> cartList, @Headers Map<String, Object> headers,
+                               Channel channel) {
+        try {
+            System.out.println("------购物车模块收到消息，开始消费---------");
+            for(Cart cart:cartList){
+                cartMapper.deleteByPrimaryKey(cart.getId());
+            }
+            Long deliveryTag = (Long) headers.get(AmqpHeaders.DELIVERY_TAG);
+            channel.basicAck(deliveryTag, false);
+        } catch (IOException e) {
+            log.error("消费者消费信息时异常：{}", e);
+        }
+    }
+
 }

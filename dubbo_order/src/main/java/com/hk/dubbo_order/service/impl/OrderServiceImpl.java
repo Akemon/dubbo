@@ -32,6 +32,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.support.CorrelationData;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -72,6 +74,10 @@ public class OrderServiceImpl implements IOrderService {
 
     @Autowired
     private ShippingMapper shippingMapper;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
 
     static {
         /** 一定要在创建AlipayTradeService之前调用Configs.init()设置默认参数
@@ -258,10 +264,15 @@ public class OrderServiceImpl implements IOrderService {
         //将订单详情批量插入到数据库中
         int count = orderItemMapper.batchInsert(orderItemList);
         if(count <= 0) return  ServerResponse.createByError("订单详情插入失败");
-        //减少库存
-        reduceStock(orderItemList);
-        //清空购物车
-        clearCart(cartList);
+
+        // 发送两个消息给消息队列，让商品模块和购物车模块去处理
+        CorrelationData c1 = new CorrelationData();
+        CorrelationData c2 = new CorrelationData();
+        //消息的唯一id
+        c1.setId(UUID.randomUUID().toString());
+        c2.setId(UUID.randomUUID().toString());
+        rabbitTemplate.convertAndSend("order-exchange","orderItem",orderItemList,c1);
+        rabbitTemplate.convertAndSend("order-exchange","cartList",cartList,c2);
 
         //返回给前端数据
         //组装订单主数据对象
@@ -494,21 +505,21 @@ public class OrderServiceImpl implements IOrderService {
         return orderItemVOList;
     }
 
-    //清除购物车信息
-    private void clearCart(List<Cart> cartList) {
-        for(Cart cart:cartList){
-            cartMapper.deleteByPrimaryKey(cart.getId());
-        }
-    }
-
-    //减少库存
-    private void reduceStock(List<OrderItem> orderItemList) {
-        for(OrderItem orderItem :orderItemList){
-            Product product = productMapper.selectByPrimaryKey(orderItem.getProductId());
-            product.setStock(product.getStock()-orderItem.getQuantity());
-            productMapper.updateByPrimaryKeySelective(product);
-        }
-    }
+//    //清除购物车信息
+//    private void clearCart(List<Cart> cartList) {
+//        for(Cart cart:cartList){
+//            cartMapper.deleteByPrimaryKey(cart.getId());
+//        }
+//    }
+//
+//    //减少库存
+//    private void reduceStock(List<OrderItem> orderItemList) {
+//        for(OrderItem orderItem :orderItemList){
+//            Product product = productMapper.selectByPrimaryKey(orderItem.getProductId());
+//            product.setStock(product.getStock()-orderItem.getQuantity());
+//            productMapper.updateByPrimaryKeySelective(product);
+//        }
+//    }
 
     /***
      * 生成订单

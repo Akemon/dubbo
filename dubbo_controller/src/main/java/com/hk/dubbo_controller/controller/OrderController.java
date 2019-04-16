@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.Iterator;
 import java.util.Map;
@@ -49,7 +50,10 @@ public class OrderController {
     @RequestMapping(value = "create.do",method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse create(Integer shippingId,
-                                 HttpServletRequest request){
+                                 HttpServletRequest request,
+                                 HttpServletResponse httpServletResponse
+                                 ){
+        httpServletResponse.addHeader("Access-Control-Allow-Origin","*");
         String cookieValue = CookieUtil.readToken(request);
         if (cookieValue != null) {
             User user = JsonUtil.string2Object(RedisShardPoolUtil.get(cookieValue), User.class);
@@ -121,20 +125,24 @@ public class OrderController {
     }
     /***
      * 支付
-     * @param session
+     * @param
      * @param orderNo
      * @param request
      * @return
      */
     @RequestMapping(value = "pay.do",method = RequestMethod.POST)
     @ResponseBody
-    public ServerResponse pay(HttpSession session, Long orderNo, HttpServletRequest request){
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if(user!= null){
+    public ServerResponse pay(
+            HttpServletResponse httpServletResponse,
+            Long orderNo, HttpServletRequest request){
+        httpServletResponse.addHeader("Access-Control-Allow-Origin","*");
+        String cookieValue = CookieUtil.readToken(request);
+        if (cookieValue != null) {
+            User user = JsonUtil.string2Object(RedisShardPoolUtil.get(cookieValue), User.class);
             String path = request.getSession().getServletContext().getRealPath("upload");
             return orderService.pay(user.getId(),path,orderNo);
         }
-        return ServerResponse.createByError("用户未登陆,请登录");
+        return ServerResponse.createByError("用户未登陆，无法查询用户信息");
     }
 
     /***
